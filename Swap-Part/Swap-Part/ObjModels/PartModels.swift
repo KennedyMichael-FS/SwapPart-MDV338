@@ -10,20 +10,55 @@ import Foundation
 class cpu {
     
     var name: String
-    var numOfCores: Int
-    var socket: String
-    var tdp: Int // In watts
-    var baseFreq: Int // In MHz
+    var brand: String
+    var link: String
     
-    init(name: String, numOfCores: Int, socket: String, tdp: Int, baseFreq: Int) {
+    init(name: String, brand: String, link: String) {
         self.name = name
-        self.numOfCores = numOfCores
-        self.socket = socket
-        self.tdp = tdp
-        self.baseFreq = baseFreq
+        self.brand = brand
+        self.link = link
     }
     
 }
 
-/// Milestone 2: Must have all other object models here.
-/// Currently, this includes GPU, RAM, storage, keyboard/mouse.
+class storageDevice {
+    
+    var name: String
+    var type: String // As HDD or SSD
+    var link: String
+    
+    init(name: String, type: String, link: String){
+        self.name = name
+        self.type = type
+        self.link = link
+    }
+    
+}
+
+class gpu {
+    
+    var name: String
+    var rank: Int
+    var link: String
+    
+    init(name: String, rank: Int, link: String){
+        self.name = name
+        self.rank = rank
+        self.link = link
+    }
+    
+}
+
+class ram {
+    
+    var name: String
+    var rank: Int
+    var link: String
+    
+    init(name: String, rank: Int, link: String){
+        self.name = name
+        self.rank = rank
+        self.link = link
+    }
+    
+}

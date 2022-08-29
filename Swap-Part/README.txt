@@ -17,7 +17,7 @@ Device Requirements
 
 Works with any physical iOS device or simulator running iOS 15 or later.
 Recommended storage requirements: 50MB free space
-Network Connection: Not required
+A Network Connection is required for the application to download necessary data.
 
 --------------------
 
@@ -49,7 +49,7 @@ In this alpha build, there are currently no logins/credentials required for test
 Known Bugs
 -----------
 
-There are currently no bugs in the alpha build -- this is due to the limited functionality it contains.
+There are currently no known bugs in the Beta version of this application.
 
 -----------
 

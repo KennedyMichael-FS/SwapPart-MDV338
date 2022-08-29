@@ -6,69 +6,60 @@
 //
 
 import UIKit
+import SafariServices
+import FirebaseCore
+import FirebaseAuth
 
 class ViewController: UIViewController {
     
-    /// Storage of necessary variables.
-    ///
     
-    var socketTypes: [String] = []
-    var cpuList: [cpu] = []
-    
-    // PLACEHOLDER - WILL NOT ACCEPT THIS AS CPU
-    var selectedCpu: cpu = cpu(name: "", numOfCores: 0, socket: "", tdp: 0, baseFreq: 0)
+    // PLACEHOLDER for OEM system checker.
     var determinedOem: Bool? = nil
 
-    /// End of variable storage.
-    ///
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        SetTempData()
         DetermineOEM()
         
     }
 
-    func SetTempData() {
+    @IBOutlet weak var currentOemOutlet: UIButton!
+    @IBAction func currentOemAction(_ sender: UIButton) {
+        let svc = SFSafariViewController(url: URL(string: "https://www.cgdirector.com/can-you-upgrade-pre-built-pc/")!)
+        present(svc, animated: true, completion: nil)
+    }
+    
+    @IBAction func savedBuilds(_ sender: Any) {
+        let savedPrompt = UIAlertController(title: "There are no saved builds.", message: "Unfortunately, this feature is not complete.", preferredStyle: UIAlertController.Style.alert)
         
-        socketTypes.append("AM4")
-        socketTypes.append("AM3")
-        socketTypes.append("FM2+")
+        savedPrompt.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
+        }))
         
-        // Temp AM4
-        cpuList.append(cpu(name: "Ryzen 7 5800", numOfCores: 8, socket: "AM4", tdp: 65, baseFreq: 3400))
-        cpuList.append(cpu(name: "Ryzen 9 3900", numOfCores: 12, socket: "AM4", tdp: 65, baseFreq: 3100))
-        cpuList.append(cpu(name: "Ryzen 5 3500", numOfCores: 6, socket: "AM4", tdp: 65, baseFreq: 3500))
-        cpuList.append(cpu(name: "Ryzen 9 3900XT", numOfCores: 12, socket: "AM4", tdp: 105, baseFreq: 3800))
-        
-        // Temp AM3
-        cpuList.append(cpu(name: "Sempron 150", numOfCores: 1, socket: "AM3", tdp: 45, baseFreq: 2900))
-        cpuList.append(cpu(name: "Athlon II X3 435", numOfCores: 3, socket: "AM3", tdp: 95, baseFreq: 2000))
-        cpuList.append(cpu(name: "Phenom II X4 925", numOfCores: 4, socket: "AM3", tdp: 95, baseFreq: 2800))
-        cpuList.append(cpu(name: "Phenmon II X6 1055T", numOfCores: 6, socket: "AM3", tdp: 125, baseFreq: 2000))
-        
-        // Temp FM2+
-        cpuList.append(cpu(name: "A8-7600", numOfCores: 4, socket: "FM2+", tdp: 65, baseFreq: 3100))
-        cpuList.append(cpu(name: "A10-8750", numOfCores: 4, socket: "FM2+", tdp: 65, baseFreq: 3600))
-        cpuList.append(cpu(name: "Athlon X4 870K", numOfCores: 4, socket: "FM2+", tdp: 95, baseFreq: 3900))
-        cpuList.append(cpu(name: "A6-8550", numOfCores: 2, socket: "FM2+", tdp: 65, baseFreq: 3700))
-        
+        present(savedPrompt, animated: true, completion: nil)
+    }
+    
+    @IBAction func signoutButton(_ sender: UIButton) {
+        SignOut()
     }
     
     func DetermineOEM() {
         
         if determinedOem == nil {
             
-            let oemPrompt = UIAlertController(title: "Is your system OEM?", message: "This will determine if your system is able to be upgraded easily. An OEM system includes prebuilt systems from Dell, Lenovo, HP, etc.", preferredStyle: UIAlertController.Style.alert)
+            let oemPrompt = UIAlertController(title: "Is your system OEM?", message: "This will determine if your system is able to be upgraded easily.", preferredStyle: UIAlertController.Style.alert)
             
             oemPrompt.addAction(UIAlertAction(title: "No", style: .default, handler: { (action: UIAlertAction!) in
                 self.determinedOem = false
+                self.OEMDetermined()
+            }))
+            
+            oemPrompt.addAction(UIAlertAction(title: "Help", style: .default, handler: {(action: UIAlertAction!) in
+                self.HelpOEMDetermination()
             }))
             
             oemPrompt.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
                 self.determinedOem = true
+                self.OEMDetermined()
             }))
 
             present(oemPrompt, animated: true, completion: nil)
@@ -80,32 +71,70 @@ class ViewController: UIViewController {
         
     }
     
-    // Function to be moved to a master function file once all categories are fully implemented.
-    func CpuListCompat(passedSocket: String) -> [cpu] {
-        
-        var compatibleCpus: [cpu] = []
-        
-        for item in cpuList {
-            if item.socket == passedSocket {
-                compatibleCpus.append(item)
-            }
+    func SignOut() {
+        do { try Auth.auth().signOut() }
+        catch {
+            print(error.localizedDescription)
         }
+        let signoutPrompt = UIAlertController(title: "Signed out.", message: "You have been signed out of SwapPart.", preferredStyle: UIAlertController.Style.alert)
         
-        return compatibleCpus
+        signoutPrompt.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
+        }))
         
+        present(signoutPrompt, animated: true, completion: nil)
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    func HelpOEMDetermination() {
         
-        if let destination = segue.destination as? SocketTableViewController {
-            
-            destination.passedSockets = socketTypes
-            destination.passedCpuList = cpuList
-            
-        }
+        let oemPrompt = UIAlertController(title: "Is your system OEM?", message:"Your system is OEM if you answer 'yes' to any of the following questions...\n \n - You purchased the system at a retail store. \n - You, or any previous owners, did not assemble this system from scratch. \n - The PC is branded with a well-known company's logo or name (Dell, HP, Lenovo, Acer, Asus, Apple, Alienware. Please note that gaming PCs are generally exempt from this question as they aren't 'pre-built'.) \n - The PC has non-removable essential parts such as its CPU, RAM, storage devices, or graphics cards.", preferredStyle: UIAlertController.Style.alert)
         
+        oemPrompt.addAction(UIAlertAction(title: "Not OEM", style: .default, handler: { (action: UIAlertAction!) in
+            self.determinedOem = false
+            self.OEMDetermined()
+        }))
+        
+        oemPrompt.addAction(UIAlertAction(title: "OEM", style: .default, handler: { (action: UIAlertAction!) in
+            self.determinedOem = true
+            self.OEMDetermined()
+        }))
+        
+        present(oemPrompt, animated: true, completion: nil)
     }
-
+    
+    func OEMDetermined() {
+        if determinedOem == false {
+            currentOemOutlet.isHidden = true
+            currentOemOutlet.isUserInteractionEnabled = false
+        }
+        if determinedOem == true {
+            currentOemOutlet.titleLabel?.text = "Current build is OEM. Tap to learn more..."
+            currentOemOutlet.isHidden = false
+            currentOemOutlet.isUserInteractionEnabled = true
+        }
+        if determinedOem == nil {
+            currentOemOutlet.titleLabel?.text = "Build may be OEM. Tap to learn more..."
+            currentOemOutlet.isHidden = false
+            currentOemOutlet.isUserInteractionEnabled = true
+        }
+    }
+    
+    // DEPRECATED: Would compare two thermal profiles of CPUs (one that was pre-selected and one that was just chosen) and return a value.
+    // Cannot be used due to API limitations, but code remains here for reference.
+    // Compares TDP (thermal design power) to determine if a thermal issue may arise
+//    func CpuThermalPotentialCompar(passedCpu: cpu) -> Bool {
+//
+//        if selectedCpu.tdp < passedCpu.tdp { // If new is warmer than selected
+//            return true
+//        }
+//        if selectedCpu.tdp > passedCpu.tdp { // If selected is warmer than new
+//            return false
+//        }
+//        else { // Shouldn't reach this point, ever!!
+//            print("Somehow, the TDP could not be compared. Returning false by default.")
+//            return false
+//        }
+//
+//    }
 
 }
 

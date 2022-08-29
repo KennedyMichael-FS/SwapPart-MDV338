@@ -9,7 +9,6 @@ import UIKit
 
 class SocketTableViewController: UITableViewController {
     
-    var passedSockets: [String] = []
     var passedCpuList: [cpu] = []
     var selectedSocket: String = ""
 
@@ -41,7 +40,7 @@ class SocketTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedSocket = passedSockets[indexPath.row]
+        selectedSocket = passedSockets[indexPath.row].description
         self.performSegue(withIdentifier: "showCpus", sender: self)
     }
     
@@ -49,9 +48,15 @@ class SocketTableViewController: UITableViewController {
         
         if let destination = segue.destination as? CpuTableViewController {
             
-            destination.passedCpuList = passedCpuList
-            destination.passedChosenSocket = selectedSocket
+            var compatibleCpus: [cpu] = []
             
+            for item in passedCpuList {
+                if item.socket == selectedSocket.description {
+                    compatibleCpus.append(item)
+                }
+            }
+            
+            destination.compatibleCpuList = compatibleCpus
             
         }
         
